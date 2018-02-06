@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.android.popularmoviesapp.DetailActivity"
+    tools:context="com.example.android.popularmoviesapp.UI.DetailActivity"
     tools:showIn="@layout/activity_detail"
     android:id="@+id/detail_activity"
     android:background="@color/colorBackground"
@@ -89,6 +89,7 @@
                 <ToggleButton
                     android:layout_marginTop="5dp"
                     android:layout_gravity="center_horizontal"
+                    android:onClick="addFavorite"
                     android:src="@drawable/star"
                     android:id="@+id/toggleButton"
                     android:layout_below="@+id/titleFilm"

@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmoviesapp.UI.DetailActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -69,7 +70,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Holder>{
         Log.d(TAG, movie.getPosterPath());
         mMovies.add(movie);
         notifyDataSetChanged();
+    }
 
+    public void setData(List<Movie> movieData){
+        mMovies = movieData;
+        notifyDataSetChanged();
     }
 
     public void clearMovies() {

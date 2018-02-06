@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesapp;
+package com.example.android.popularmoviesapp.Data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -42,4 +42,12 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         onCreate(db);
 
     }
+
+    /**
+     * Created by Lorenzo on 29/12/17.
+     */
+
+
+
+
 }

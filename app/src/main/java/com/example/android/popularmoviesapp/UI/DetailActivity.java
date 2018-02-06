@@ -1,7 +1,9 @@
-package com.example.android.popularmoviesapp;
+package com.example.android.popularmoviesapp.UI;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -20,6 +22,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.android.popularmoviesapp.Data.MovieContract;
+import com.example.android.popularmoviesapp.Data.MovieDBHelper;
+import com.example.android.popularmoviesapp.Movie;
+import com.example.android.popularmoviesapp.MoviesTrailer;
+import com.example.android.popularmoviesapp.R;
+import com.example.android.popularmoviesapp.RestManager;
+import com.example.android.popularmoviesapp.Trailer;
+import com.example.android.popularmoviesapp.TrailerAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -96,19 +106,50 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
         toggleButton.setChecked(false);
         toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star));
-
-        toggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent addMovieFavorite = new Intent(DetailActivity.this, MainActivity.class);
-                startActivity(addMovieFavorite);
-            }
-        });
-
-        getSupportLoaderManager().restartLoader(FAVORITE_LOADER_ID, null, this);
-
     }
 
+
+    public void addFavorite(View view){
+
+        String imageString = movie.getPosterPath();
+        String favMovieId = movie.getId().toString();
+        String favTitle = movie.getOriginalTitle();
+        String favRate = String.valueOf(movie.getVoteAverage());
+        String favOverview = movie.getOverview();
+
+        long id = 0;
+        if (favMovieId != null){
+            id = Long.parseLong(favMovieId);
+        }
+
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieContract.MovieEntry.COLUMN_ID, id);
+        contentValues.put(MovieContract.MovieEntry.COLUMN_RATE, favRate);
+        contentValues.put(MovieContract.MovieEntry.COLUMN_NAME, favTitle);
+        contentValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, imageString);
+        contentValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, favOverview);
+
+
+        Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
+
+        if (uri != null){
+            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+        }
+        finish();
+    }
+
+//    private void deleteFav(){
+//        ContentResolver contentResolver = getContentResolver();
+//        String selection = MovieContract.MovieEntry.COLUMN_ID + "=?";
+//        String favId = movie.getId().toString();
+//        long id = Long.parseLong(favId);
+//        Log.v(TAG, "Movie id to be deleted");
+//
+//        String[] args = new String[]{
+//                String.valueOf(ContentUris.parseId(uri))
+//        }
+//    }
 
 
 //        toggleButton.setOnCheckedChangeListener(
@@ -117,7 +158,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 //                    @Override
 //                    public void onCheckedChanged(CompoundButton buttonView, boolean favorite) {
 //                        if (favorite){
-//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.DetailActivity", MODE_PRIVATE).edit();
+//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
 //                            editor.putBoolean("Favorite added", true);
 //                            editor.commit();
 ////                            saveFavorite();
@@ -131,7 +172,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 //                            uri = uri.buildUpon().appendPath(stringId).build();
 //                            getContentResolver().delete(uri, null, null);
 //                            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star_copia));
-//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.DetailActivity", MODE_PRIVATE).edit();
+//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
 //                            editor.putBoolean("Favorite removed", true);
 //                            editor.commit();
 //                            Snackbar.make(buttonView, "Removed from favorite",

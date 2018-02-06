@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesapp;
+package com.example.android.popularmoviesapp.Data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
-import static com.example.android.popularmoviesapp.MovieContract.MovieEntry.TABLE_NAME;
+import static com.example.android.popularmoviesapp.Data.MovieContract.MovieEntry.TABLE_NAME;
 
 /**
  * Created by Lorenzo on 12/01/18.
@@ -26,7 +26,7 @@ public class MovieProvider extends ContentProvider{
     public static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-        uriMatcher.addURI(MovieContract.AUTHORITY,MovieContract.PATH_FAVOURITE,MOVIES);
+        uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_FAVOURITE,MOVIES);
         uriMatcher.addURI(MovieContract.AUTHORITY, MovieContract.PATH_FAVOURITE + "/#", MOVIES_WITH_ID);
 
         return uriMatcher;
