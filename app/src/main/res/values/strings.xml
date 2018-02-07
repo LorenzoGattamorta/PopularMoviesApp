@@ -13,4 +13,5 @@
     <string name="no_action_settings_already">No action settings</string>
     <string name="trailer">Trailer</string>
     <string name="favorite">Favorite</string>
+    <string name="internet">No internet</string>
 </resources>

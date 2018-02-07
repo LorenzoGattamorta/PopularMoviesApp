@@ -19,6 +19,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.Data.MovieContract;
 import com.example.android.popularmoviesapp.Data.MovieDBHelper;
@@ -284,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
 
             getSupportLoaderManager().initLoader(FAV_LOADER_ID, null, favLoaders).forceLoad();
         } else {
-            //Toast.makeText(this, getString(R.string.internet), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.internet), Toast.LENGTH_SHORT).show();
         }
     }
 
