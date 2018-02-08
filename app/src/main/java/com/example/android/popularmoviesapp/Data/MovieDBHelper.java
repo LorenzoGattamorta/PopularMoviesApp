@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class MovieDBHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "favouriteMovies.db";
 
     public MovieDBHelper(Context context) {
@@ -33,7 +33,6 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
         db.execSQL(SQL_CREATE_TABLE);
 
-
     }
 
     @Override
@@ -42,12 +41,6 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         onCreate(db);
 
     }
-
-    /**
-     * Created by Lorenzo on 29/12/17.
-     */
-
-
 
 
 }

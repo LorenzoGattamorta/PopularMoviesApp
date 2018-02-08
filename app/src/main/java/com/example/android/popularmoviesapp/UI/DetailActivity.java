@@ -134,70 +134,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         Uri uri = getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
 
         if (uri != null){
-            Toast.makeText(getBaseContext(), uri.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(DetailActivity.this, "Added to favorites", Toast.LENGTH_LONG).show();
         }
         finish();
     }
 
-//    private void deleteFav(){
-//        ContentResolver contentResolver = getContentResolver();
-//        String selection = MovieContract.MovieEntry.COLUMN_ID + "=?";
-//        String favId = movie.getId().toString();
-//        long id = Long.parseLong(favId);
-//        Log.v(TAG, "Movie id to be deleted");
-//
-//        String[] args = new String[]{
-//                String.valueOf(ContentUris.parseId(uri))
-//        }
-//    }
-
-
-//        toggleButton.setOnCheckedChangeListener(
-//                new ToggleButton.OnCheckedChangeListener(){
-//
-//                    @Override
-//                    public void onCheckedChanged(CompoundButton buttonView, boolean favorite) {
-//                        if (favorite){
-//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
-//                            editor.putBoolean("Favorite added", true);
-//                            editor.commit();
-////                            saveFavorite();
-//                            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star));
-//                            Snackbar.make(buttonView, "Added to favorite",
-//                                    Snackbar.LENGTH_SHORT).show();
-//                        } else {
-//                            movieDBHelper = new MovieDBHelper(DetailActivity.this);
-//                            String stringId = Integer.toString(id);
-//                            Uri uri = MovieContract.MovieEntry.CONTENT_URI;
-//                            uri = uri.buildUpon().appendPath(stringId).build();
-//                            getContentResolver().delete(uri, null, null);
-//                            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star_copia));
-//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
-//                            editor.putBoolean("Favorite removed", true);
-//                            editor.commit();
-//                            Snackbar.make(buttonView, "Removed from favorite",
-//                                    Snackbar.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                }
-//        );
-
-//    public void saveFavorite() {
-//        movieDBHelper = new MovieDBHelper(activity);
-//        favorite = new Movie();
-//            ContentValues movieValues = new ContentValues();
-//            movieValues.put(MovieContract.MovieEntry.COLUMN_NAME, movie.getTitle());
-//            movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie.getTitle());
-//            movieValues.put(MovieContract.MovieEntry.COLUMN_RATE, movie.getVoteAverage());
-//            movieValues.put(MovieContract.MovieEntry.COLUMN_ID, movie.getId());
-//            movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, movie.getOverview());
-//            ContentResolver moviesContentResolver = getContentResolver();
-//
-//            moviesContentResolver.insert(
-//                    MovieContract.MovieEntry.CONTENT_URI,
-//                    movieValues);
-//            Toast.makeText(this, "Saved to favorites!", Toast.LENGTH_SHORT).show();
-//        }
 
     private void initCollapsingToolbar(){
         final CollapsingToolbarLayout collapsingToolbarLayout =
@@ -309,4 +250,64 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoaderReset(Loader<Cursor> loader) {
 
     }
+
+    //    private void deleteFav(){
+//        ContentResolver contentResolver = getContentResolver();
+//        String selection = MovieContract.MovieEntry.COLUMN_ID + "=?";
+//        String favId = movie.getId().toString();
+//        long id = Long.parseLong(favId);
+//        Log.v(TAG, "Movie id to be deleted");
+//
+//        String[] args = new String[]{
+//                String.valueOf(ContentUris.parseId(uri))
+//        }
+//    }
+
+
+//        toggleButton.setOnCheckedChangeListener(
+//                new ToggleButton.OnCheckedChangeListener(){
+//
+//                    @Override
+//                    public void onCheckedChanged(CompoundButton buttonView, boolean favorite) {
+//                        if (favorite){
+//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
+//                            editor.putBoolean("Favorite added", true);
+//                            editor.commit();
+////                            saveFavorite();
+//                            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star));
+//                            Snackbar.make(buttonView, "Added to favorite",
+//                                    Snackbar.LENGTH_SHORT).show();
+//                        } else {
+//                            movieDBHelper = new MovieDBHelper(DetailActivity.this);
+//                            String stringId = Integer.toString(id);
+//                            Uri uri = MovieContract.MovieEntry.CONTENT_URI;
+//                            uri = uri.buildUpon().appendPath(stringId).build();
+//                            getContentResolver().delete(uri, null, null);
+//                            toggleButton.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.star_copia));
+//                            SharedPreferences.Editor editor = getSharedPreferences("com.example.android.popularmoviesapp.UI.DetailActivity", MODE_PRIVATE).edit();
+//                            editor.putBoolean("Favorite removed", true);
+//                            editor.commit();
+//                            Snackbar.make(buttonView, "Removed from favorite",
+//                                    Snackbar.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                }
+//        );
+
+//    public void saveFavorite() {
+//        movieDBHelper = new MovieDBHelper(activity);
+//        favorite = new Movie();
+//            ContentValues movieValues = new ContentValues();
+//            movieValues.put(MovieContract.MovieEntry.COLUMN_NAME, movie.getTitle());
+//            movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie.getTitle());
+//            movieValues.put(MovieContract.MovieEntry.COLUMN_RATE, movie.getVoteAverage());
+//            movieValues.put(MovieContract.MovieEntry.COLUMN_ID, movie.getId());
+//            movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, movie.getOverview());
+//            ContentResolver moviesContentResolver = getContentResolver();
+//
+//            moviesContentResolver.insert(
+//                    MovieContract.MovieEntry.CONTENT_URI,
+//                    movieValues);
+//            Toast.makeText(this, "Saved to favorites!", Toast.LENGTH_SHORT).show();
+//        }
 }
