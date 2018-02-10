@@ -5,12 +5,9 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,7 +16,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.example.android.popularmoviesapp.Data.MovieContract;
 import com.example.android.popularmoviesapp.Data.MovieDBHelper;
@@ -51,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String ORDER_EXTRAS = "ORDER_EXTRAS";
     private static final int MOVIE_LOADER_ID = 1;
     private String sortBy = "top_rated";
-    private ArrayList<Movie> movies;
+    private ArrayList<Movie> arrMovies;
     private static final int FAV_LOADER_ID = 3;
 
 
@@ -62,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         configViews();
 
         mManager = new RestManager();
+
+
 
 
         //SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -183,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.favorite:
                 item.setChecked(!item.isChecked());
-                //mMovieList = addMovie();
+                queryData();
+
                 mMovieAdapter.clearMovies();
                 break;
         }
@@ -191,103 +190,146 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private LoaderManager.LoaderCallbacks<Cursor> favLoaders = new LoaderManager.LoaderCallbacks<Cursor>(){
+    private void queryData() {
+        new DataQueryTask().execute(MovieContract.MovieEntry.CONTENT_URI);
+    }
 
+    public class DataQueryTask extends AsyncTask<Uri, Void, ArrayList<Movie>> {
+
+        @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+        }
 
 
         @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        protected ArrayList<Movie> doInBackground(Uri... params) {
+            Cursor data = getBaseContext().getContentResolver().query(params[0], null, null, null, null);
+            int titleData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
+            int overviewData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
+            int ratingData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
+            int posterpathData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
+            int idData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
 
-            return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
+            ArrayList<Movie> movies = new ArrayList<>();
+            while (data.moveToNext()){
+                String title = data.getString(titleData);
+                String overview = data.getString(overviewData);
+                double rate = data.getDouble(ratingData);
+                int id = data.getInt(idData);
+                String posterpath = data.getString(posterpathData);
 
-                Cursor fav = null;
+                movies.add(new Movie(posterpath, overview, title, id, rate));
+            }
 
-                @Override
-                protected void onStartLoading(){
-                    forceLoad();
-                }
+            arrMovies = movies;
+            return arrMovies;
 
-                @Override
-                public Cursor loadInBackground() {
-                    try {
-                        return getContentResolver().query(
-                                MovieContract.MovieEntry.CONTENT_URI,
-                                null,
-                                null,
-                                null,
-                                null
-                        );
-                    } catch (Exception e){
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-                @Override
-                public void deliverResult(Cursor data){
-                    fav = data;
-                    super.deliverResult(data);
-                }
-            };
         }
 
         @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
-            mMovieAdapter.setData(null);
-
-            if (loader.getId() == FAV_LOADER_ID){
-                if (data.getCount()>1){
-                    Log.e(TAG, "No matches");
+        protected void onPostExecute(ArrayList<Movie> movies){
+            if (movies != null){
+                Log.d(TAG, "No films");
+                if (mMovieAdapter == null){
+                    mMovieAdapter = new MovieAdapter(arrMovies);
                 } else {
-                    mMovieAdapter.clearMovies();
-                    while (data.moveToNext()){
-                        int movieId = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
-                        int movieTitle = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
-                        int moviePoster = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
-                        int movieOverview = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
-                        int movieRating = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
-
-                        Long id = data.getLong(movieId);
-                        String title = data.getString(movieTitle);
-                        String poster = data.getString(moviePoster);
-                        String overview = data.getString(movieOverview);
-                        String rate = data.getString(movieRating);
-
-                       // mMovieList.add(new ArrayList<>(poster, id, title, overview, rate );
-                    }
-
-                    mMovieAdapter.setData(mMovieList);
-                    Log.v(TAG, "Favorite List");
+                    mMovieAdapter.notifyDataSetChanged();
                 }
             } else {
-                mMovieAdapter.clearMovies();
+                Log.d(TAG, "No films");
             }
-
         }
 
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-            mMovieAdapter.clearMovies();
-            if (loader != null){
-                mMovieAdapter.clearMovies();
-            } else {
-                mMovieAdapter.setData(null);
-            }
-
-        }
     };
 
-    private void favoriteLoader() {
-        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+//    private LoaderManager.LoaderCallbacks<Cursor> favLoaders = new LoaderManager.LoaderCallbacks<Cursor>(){
+//
+//
+//
+//        @Override
+//        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//
+//            return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
+//
+//                Cursor fav = null;
+//
+//                @Override
+//                protected void onStartLoading(){
+//                    forceLoad();
+//                }
+//
+//                @Override
+//                public Cursor loadInBackground() {
+//                    try {
+//                        return getContentResolver().query(
+//                                MovieContract.MovieEntry.CONTENT_URI,
+//                                null,
+//                                null,
+//                                null,
+//                                null
+//                        );
+//                    } catch (Exception e){
+//                        e.printStackTrace();
+//                        return null;
+//                    }
+//                }
+//                @Override
+//                public void deliverResult(Cursor data){
+//                    fav = data;
+//                    super.deliverResult(data);
+//                }
+//            };
+//        }
+
+//        @Override
+//        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//
+//            mMovieAdapter.setData(null);
+//
+//            if (loader.getId() == FAV_LOADER_ID){
+//                if (data.getCount()>1){
+//                    Log.e(TAG, "No matches");
+//                } else {
+//                    mMovieAdapter.clearMovies();
+//                    while (data.moveToNext()){
+//                        int movieId = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
+//                        int movieTitle = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
+//                        int moviePoster = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
+//                        int movieOverview = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
+//                        int movieRating = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
+//
+//                        Long id = data.getLong(movieId);
+//                        String title = data.getString(movieTitle);
+//                        String poster = data.getString(moviePoster);
+//                        String overview = data.getString(movieOverview);
+//                        String rate = data.getString(movieRating);
+//
+//                       // mMovieList.add(new ArrayList<>(poster, id, title, overview, rate );
+//                    }
+//
+//                    mMovieAdapter.setData(mMovieList);
+//                    Log.v(TAG, "Favorite List");
+//                }
+//            } else {
+//                mMovieAdapter.clearMovies();
+//            }
+//
+//        }
 
 
-            getSupportLoaderManager().initLoader(FAV_LOADER_ID, null, favLoaders).forceLoad();
-        } else {
-            Toast.makeText(this, getString(R.string.internet), Toast.LENGTH_SHORT).show();
-        }
-    }
+
+//    private void favoriteLoader() {
+//        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        final NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+//
+//
+//            getSupportLoaderManager().initLoader(FAV_LOADER_ID, null, favLoaders).forceLoad();
+//        } else {
+//            Toast.makeText(this, getString(R.string.internet), Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
 
 //    private ArrayList<Movie> LoadFavoriteDB(){

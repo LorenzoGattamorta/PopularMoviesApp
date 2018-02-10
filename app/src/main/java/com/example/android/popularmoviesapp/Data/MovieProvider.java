@@ -20,6 +20,8 @@ public class MovieProvider extends ContentProvider{
 
     public static final int MOVIES = 100;
     public static final int MOVIES_WITH_ID = 101;
+    static final Uri CONTENT_URI = Uri.parse("content://MovieProvider/movie");
+
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 

@@ -139,7 +139,6 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         finish();
     }
 
-
     private void initCollapsingToolbar(){
         final CollapsingToolbarLayout collapsingToolbarLayout =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);

@@ -61,7 +61,7 @@ public class Movie implements Parcelable{
         this.voteAverage = voteAverage;
     }
 
-    public Movie() {
+    public Movie(String posterpath, String overview, String title, int id, double rate) {
 
     }
 
