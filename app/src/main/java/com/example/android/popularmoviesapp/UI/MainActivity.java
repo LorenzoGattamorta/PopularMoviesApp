@@ -5,9 +5,10 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -34,7 +35,7 @@ import retrofit2.Response;
 
 import static com.example.android.popularmoviesapp.R.id.recyclerView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private RecyclerView mRecyclerView;
@@ -60,8 +61,6 @@ public class MainActivity extends AppCompatActivity {
         mManager = new RestManager();
 
 
-
-
         //SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
         //String sortBy = sharedPref.getString("SORT_CRITERION_KEY", "top_rated");
 
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
-        if (sortBy!=null && !sortBy.isEmpty()) {
+        if (sortBy != null && !sortBy.isEmpty()) {
             savedInstanceState.putString("sort_criteria", sortBy);
         }
         super.onSaveInstanceState(savedInstanceState);
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             if (savedInstanceState.containsKey("sort_criteria")) {
                 sortBy = savedInstanceState.getString("sort_criteria");
-                Log.e("sort_criteria", "->"+sortBy);
+                Log.e("sort_criteria", "->" + sortBy);
             }
         }
     }
@@ -120,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public Activity getActivity(){
+    public Activity getActivity() {
         Context context = this;
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
@@ -142,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(mMovieAdapter);
 
-        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         } else {
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
@@ -159,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
 
 
     @Override
@@ -181,8 +179,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.favorite:
                 item.setChecked(!item.isChecked());
-                queryData();
+                sortBy = "favorites";
 
+                getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        MovieContract.MovieEntry.COLUMN_ID);
                 mMovieAdapter.clearMovies();
                 break;
         }
@@ -190,133 +193,113 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void queryData() {
-        new DataQueryTask().execute(MovieContract.MovieEntry.CONTENT_URI);
-    }
-
-    public class DataQueryTask extends AsyncTask<Uri, Void, ArrayList<Movie>> {
-
-        @Override
-        protected void onPreExecute(){
-            super.onPreExecute();
-        }
-
-
-        @Override
-        protected ArrayList<Movie> doInBackground(Uri... params) {
-            Cursor data = getBaseContext().getContentResolver().query(params[0], null, null, null, null);
-            int titleData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
-            int overviewData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
-            int ratingData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
-            int posterpathData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
-            int idData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
-
-            ArrayList<Movie> movies = new ArrayList<>();
-            while (data.moveToNext()){
-                String title = data.getString(titleData);
-                String overview = data.getString(overviewData);
-                double rate = data.getDouble(ratingData);
-                int id = data.getInt(idData);
-                String posterpath = data.getString(posterpathData);
-
-                movies.add(new Movie(posterpath, overview, title, id, rate));
-            }
-
-            arrMovies = movies;
-            return arrMovies;
-
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Movie> movies){
-            if (movies != null){
-                Log.d(TAG, "No films");
-                if (mMovieAdapter == null){
-                    mMovieAdapter = new MovieAdapter(arrMovies);
-                } else {
-                    mMovieAdapter.notifyDataSetChanged();
-                }
-            } else {
-                Log.d(TAG, "No films");
-            }
-        }
-
-    };
-
-//    private LoaderManager.LoaderCallbacks<Cursor> favLoaders = new LoaderManager.LoaderCallbacks<Cursor>(){
+//    private void queryData() {
+//        new DataQueryTask().execute(MovieContract.MovieEntry.CONTENT_URI);
+//    }
 //
-//
+//    public class DataQueryTask extends AsyncTask<Uri, Void, ArrayList<Movie>> {
 //
 //        @Override
-//        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//
-//            return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
-//
-//                Cursor fav = null;
-//
-//                @Override
-//                protected void onStartLoading(){
-//                    forceLoad();
-//                }
-//
-//                @Override
-//                public Cursor loadInBackground() {
-//                    try {
-//                        return getContentResolver().query(
-//                                MovieContract.MovieEntry.CONTENT_URI,
-//                                null,
-//                                null,
-//                                null,
-//                                null
-//                        );
-//                    } catch (Exception e){
-//                        e.printStackTrace();
-//                        return null;
-//                    }
-//                }
-//                @Override
-//                public void deliverResult(Cursor data){
-//                    fav = data;
-//                    super.deliverResult(data);
-//                }
-//            };
+//        protected void onPreExecute(){
+//            super.onPreExecute();
 //        }
-
+//
+//
 //        @Override
-//        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//        protected ArrayList<Movie> doInBackground(Uri... params) {
+//            Cursor data = getBaseContext().getContentResolver().query(params[0], null, null, null, null);
+//            int titleData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
+//            int overviewData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
+//            int ratingData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
+//            int posterpathData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
+//            int idData = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
 //
-//            mMovieAdapter.setData(null);
+//            ArrayList<Movie> movies = new ArrayList<>();
+//            while (data.moveToNext()){
+//                String title = data.getString(titleData);
+//                String overview = data.getString(overviewData);
+//                double rate = data.getDouble(ratingData);
+//                int id = data.getInt(idData);
+//                String posterpath = data.getString(posterpathData);
 //
-//            if (loader.getId() == FAV_LOADER_ID){
-//                if (data.getCount()>1){
-//                    Log.e(TAG, "No matches");
-//                } else {
-//                    mMovieAdapter.clearMovies();
-//                    while (data.moveToNext()){
-//                        int movieId = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID);
-//                        int movieTitle = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_NAME);
-//                        int moviePoster = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH);
-//                        int movieOverview = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS);
-//                        int movieRating = data.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATE);
-//
-//                        Long id = data.getLong(movieId);
-//                        String title = data.getString(movieTitle);
-//                        String poster = data.getString(moviePoster);
-//                        String overview = data.getString(movieOverview);
-//                        String rate = data.getString(movieRating);
-//
-//                       // mMovieList.add(new ArrayList<>(poster, id, title, overview, rate );
-//                    }
-//
-//                    mMovieAdapter.setData(mMovieList);
-//                    Log.v(TAG, "Favorite List");
-//                }
-//            } else {
-//                mMovieAdapter.clearMovies();
+//                movies.add(new Movie(posterpath, overview, title, id, rate));
 //            }
 //
+//            arrMovies = movies;
+//            return arrMovies;
+//
 //        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<Movie> movies){
+//            if (movies != null){
+//                Log.d(TAG, "No films");
+//                if (mMovieAdapter == null){
+//                    mMovieAdapter = new MovieAdapter(arrMovies);
+//                } else {
+//                    mMovieAdapter.notifyDataSetChanged();
+//                }
+//            } else {
+//                Log.d(TAG, "No films");
+//            }
+//        }
+//
+//    };
 
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        return new AsyncTaskLoader<Cursor>(getApplicationContext()) {
+
+            Cursor fav = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (fav != null) {
+                    deliverResult(fav);
+                } else {
+                    forceLoad();
+                }
+
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    return getContentResolver().query(
+                            MovieContract.MovieEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            MovieContract.MovieEntry.COLUMN_ID
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            public void deliverResult(Cursor data) {
+                fav = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader){
+
+    }
+
+}
 
 
 //    private void favoriteLoader() {
@@ -352,54 +335,54 @@ public class MainActivity extends AppCompatActivity {
 //        return movieToAdapter;
 //    }
 
-//    private void loadFavorite() {
-//       mRecyclerView = (RecyclerView) findViewById(recyclerView);
-//        mMovieList = new ArrayList<>();
-//        mMovieAdapter = new MovieAdapter(mMovieList);
+////    private void loadFavorite() {
+////       mRecyclerView = (RecyclerView) findViewById(recyclerView);
+////        mMovieList = new ArrayList<>();
+////        mMovieAdapter = new MovieAdapter(mMovieList);
+////
+////        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+////            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+////        } else {
+////            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
+////        }
+////
+////        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+////        mRecyclerView.setAdapter(mMovieAdapter);
+////        mMovieAdapter.notifyDataSetChanged();
+////        movieDBHelper = new MovieDBHelper(activity);
+////
+////        getAllFavorite();
+////    }
+////
+////    private void getAllFavorite() {
+////        new AsyncTask<Void, Void, Void>(){
+////
+////            @Override
+////            protected Void doInBackground(Void... params) {
+////                mMovieList.clear();
+////                return null;
+////            }
+////
+////            @Override
+////            protected void onPostExecute(Void aVoid){
+////                super.onPostExecute(aVoid);
+////                mMovieAdapter.notifyDataSetChanged();
+////            }
+////        }.execute();
+////    }
 //
-//        if (getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-//            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-//        } else {
-//            mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
-//        }
-//
-//        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-//        mRecyclerView.setAdapter(mMovieAdapter);
-//        mMovieAdapter.notifyDataSetChanged();
-//        movieDBHelper = new MovieDBHelper(activity);
-//
-//        getAllFavorite();
-//    }
-//
-//    private void getAllFavorite() {
-//        new AsyncTask<Void, Void, Void>(){
-//
-//            @Override
-//            protected Void doInBackground(Void... params) {
-//                mMovieList.clear();
-//                return null;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Void aVoid){
-//                super.onPostExecute(aVoid);
-//                mMovieAdapter.notifyDataSetChanged();
-//            }
-//        }.execute();
-//    }
-
-//    @Override
-//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-//
-//        Log.d(TAG, "Preference updated");
-//        LoadFavoriteDB();
-//    }
-//
-//    @NonNull
-//    private String getPreference() {
-//        SharedPreferences shared = getSharedPreferences("sort", MODE_PRIVATE);
-//        String pref = (shared.getString("sort_by", ""));
-//        Log.v("Main", "value is: " + pref);
-//        return pref;
-//    }
-}
+////    @Override
+////    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+////
+////        Log.d(TAG, "Preference updated");
+////        LoadFavoriteDB();
+////    }
+////
+////    @NonNull
+////    private String getPreference() {
+////        SharedPreferences shared = getSharedPreferences("sort", MODE_PRIVATE);
+////        String pref = (shared.getString("sort_by", ""));
+////        Log.v("Main", "value is: " + pref);
+////        return pref;
+////    }
+//}
