@@ -1,4 +1,4 @@
-package com.example.android.popularmoviesapp;
+package com.example.android.popularmoviesapp.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmoviesapp.Movie;
+import com.example.android.popularmoviesapp.R;
 import com.example.android.popularmoviesapp.UI.DetailActivity;
 import com.squareup.picasso.Picasso;
 
@@ -62,7 +64,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Holder>{
 
     @Override
     public int getItemCount() {
-        return mMovies!=null? mMovies.size():0;
+        return mMovies!=null?
+                mMovies.size():0;
     }
 
     public void addMovie(Movie movie) {

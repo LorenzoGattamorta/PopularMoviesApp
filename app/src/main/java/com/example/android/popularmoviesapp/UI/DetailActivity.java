@@ -29,7 +29,7 @@ import com.example.android.popularmoviesapp.MoviesTrailer;
 import com.example.android.popularmoviesapp.R;
 import com.example.android.popularmoviesapp.RestManager;
 import com.example.android.popularmoviesapp.Trailer;
-import com.example.android.popularmoviesapp.TrailerAdapter;
+import com.example.android.popularmoviesapp.Adapter.TrailerAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
