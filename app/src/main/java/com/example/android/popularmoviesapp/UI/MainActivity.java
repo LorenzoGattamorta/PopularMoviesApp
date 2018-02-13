@@ -62,8 +62,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         mManager = new RestManager();
 
-        mAdapter = new FavoritesAdapter(this);
-        mRecyclerView.setAdapter(mAdapter);
 
 
         //SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
@@ -174,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 item.setChecked(!item.isChecked());
                 sortBy = "popular";
                 loadMovies(sortBy);
-
                 break;
             case R.id.top_rated:
                 item.setChecked(!item.isChecked());
@@ -183,11 +180,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 break;
             case R.id.favorite:
                 item.setChecked(!item.isChecked());
-                sortBy = "favorites";
+                displayFavourites();
                 break;
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    private void displayFavourites() {
+        mRecyclerView.setAdapter(mAdapter);
+        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
     }
 
     @Override
